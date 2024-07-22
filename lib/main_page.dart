@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
 import 'widgets/sidebar.dart';
+import 'post_detail_page.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -13,6 +14,7 @@ class _MainPageState extends State<MainPage> {
   String _type = '';
   List<Map<String, dynamic>> _posts = [];
   List<Map<String, dynamic>> _filteredPosts = [];
+  bool _isLoading = true; // New state variable to track loading state
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final TextEditingController _searchController = TextEditingController();
   String _selectedArea = '';
@@ -37,8 +39,9 @@ class _MainPageState extends State<MainPage> {
   Future<void> _loadPosts() async {
     List<Map<String, dynamic>> posts = await _databaseHelper.fetchPosts();
     setState(() {
-      _posts = posts;
-      _filteredPosts = posts;
+      _posts = posts.where((post) => post['status'] == 'approved').toList();
+      _filteredPosts = _posts;
+      _isLoading = false; // Set loading to false after data is loaded
     });
   }
 
@@ -191,59 +194,66 @@ class _MainPageState extends State<MainPage> {
             ),
           ),
           Expanded(
-            child: _filteredPosts.isNotEmpty
-                ? ListView.builder(
-                    itemCount: _filteredPosts.length,
-                    itemBuilder: (context, index) {
-                      final post = _filteredPosts[index];
-                      return Column(
-                        children: [
-                          ListTile(
-                            leading: Image.asset(
-                              'lib/image/${post['imageName']}',
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  'lib/image/no_Image.jpg',
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : _filteredPosts.isNotEmpty
+                    ? ListView.builder(
+                        itemCount: _filteredPosts.length,
+                        itemBuilder: (context, index) {
+                          final post = _filteredPosts[index];
+                          return Column(
+                            children: [
+                              ListTile(
+                                leading: Image.asset(
+                                  'lib/image/${post['imageName']}',
                                   width: 50,
                                   height: 50,
                                   fit: BoxFit.cover,
-                                );
-                              },
-                            ),
-                            title: Text(post['title']),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(post['companyName']),
-                                Text(post['area']),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.arrow_right, size: 48), // Doubled the size of the icon
-                                Text('${post['highestSalary']}'),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Divider(
-                            color: Colors.grey,
-                            height: 1,
-                            thickness: 1,
-                          ),
-                        ],
-                      );
-                    },
-                  )
-                : Center(
-                    child: _posts.isEmpty
-                        ? CircularProgressIndicator()
-                        : Text('No results found'),
-                  ),
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset(
+                                      'lib/image/no_Image.jpg',
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
+                                title: Text(post['title']),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(post['companyName']),
+                                    Text(post['area']),
+                                  ],
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.arrow_right, size: 30),
+                                  ],
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PostDetailPage(post: post),
+                                    ),
+                                  );
+                                },
+                              ),
+                              Divider(
+                                height: 5,
+                                thickness: 2,
+                              ),
+                            ],
+                          );
+                        },
+                      )
+                    : Center(
+                        child: Text('No posts found'),
+                      ),
           ),
         ],
       ),

@@ -54,7 +54,7 @@ class DatabaseHelper {
         'description': 'A great opportunity for junior developers.',
         'longitude': 101.6869,
         'latitude': 3.1390,
-        'status': 'pending',
+        'status': 'approved',
         'registration_no': 'JUN123',
         'area': 'Kuala Lumpur',
       },
