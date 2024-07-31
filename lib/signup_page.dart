@@ -13,7 +13,7 @@ class _SignupPageState extends State<SignupPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
-  String _userType = 'Student'; // Default value
+  String _userType = 'student'; // Default value
 
   Future<void> _signup(BuildContext context) async {
     String username = _usernameController.text.trim();
@@ -87,7 +87,7 @@ class _SignupPageState extends State<SignupPage> {
                     child: ListTile(
                       title: const Text('Student'),
                       leading: Radio<String>(
-                        value: 'Student',
+                        value: 'student',
                         groupValue: _userType,
                         onChanged: (value) {
                           setState(() {
@@ -101,7 +101,7 @@ class _SignupPageState extends State<SignupPage> {
                     child: ListTile(
                       title: const Text('Employer'),
                       leading: Radio<String>(
-                        value: 'Employer',
+                        value: 'employer',
                         groupValue: _userType,
                         onChanged: (value) {
                           setState(() {

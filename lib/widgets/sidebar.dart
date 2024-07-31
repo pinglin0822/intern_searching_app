@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../main_page.dart';
 import '../login_page.dart';
+import '../manage_post.dart'; // Import the manage_post.dart file
 
 class AppDrawer extends StatefulWidget {
   @override
@@ -10,17 +11,19 @@ class AppDrawer extends StatefulWidget {
 
 class _AppDrawerState extends State<AppDrawer> {
   String _username = '';
+  String _userType = ''; // Variable to store user type
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    _loadUserData();
   }
 
-  Future<void> _loadUsername() async {
+  Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _username = prefs.getString('username') ?? 'Guest';
+      _userType = prefs.getString('userType') ?? ''; // Load user type
     });
   }
 
@@ -69,7 +72,20 @@ class _AppDrawerState extends State<AppDrawer> {
               );
             },
           ),
-          // Add more list tiles for other pages here
+          // Conditionally show "Manage Post" button for admins
+          if (_userType == 'admin') ...[
+            ListTile(
+              leading: Icon(Icons.manage_accounts),
+              title: Text('Manage Posts'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ManagePostPage()),
+                );
+              },
+            ),
+            Divider(),
+          ],
           Divider(),
           ListTile(
             leading: Icon(Icons.logout),

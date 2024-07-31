@@ -72,7 +72,7 @@ class DatabaseHelper {
         'description': 'Looking for experienced senior developers.',
         'longitude': 100.5018,
         'latitude': 13.7563,
-        'status': 'pending',
+        'status': 'approved',
         'registration_no': 'SEN456',
         'area': 'Johor',
       },
@@ -142,6 +142,16 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  Future<void> updatePostStatus(int postId, String newStatus) async {
+  final db = await database;
+  await db.update(
+    'posts',
+    {'status': newStatus},
+    where: 'id = ?',
+    whereArgs: [postId],
+  );
+}
 
   // Delete Post
   Future<void> deletePost(int id) async {

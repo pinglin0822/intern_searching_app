@@ -6,17 +6,16 @@ import 'widgets/sidebar.dart';
 import 'post_detail_page.dart';
 import 'create_post_page.dart';
 
-class MainPage extends StatefulWidget {
+class ManagePostPage extends StatefulWidget {
   @override
-  _MainPageState createState() => _MainPageState();
+  _ManagePostPageState createState() => _ManagePostPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _ManagePostPageState extends State<ManagePostPage> {
   String _username = '';
-  String _type = '';
   List<Map<String, dynamic>> _posts = [];
   List<Map<String, dynamic>> _filteredPosts = [];
-  bool _isLoading = true; // New state variable to track loading state
+  bool _isLoading = true;
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   final TextEditingController _searchController = TextEditingController();
   String _selectedArea = '';
@@ -34,7 +33,6 @@ class _MainPageState extends State<MainPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _username = prefs.getString('username') ?? '';
-      _type = prefs.getString('userType') ?? '';
     });
   }
 
@@ -42,12 +40,12 @@ class _MainPageState extends State<MainPage> {
     List<Map<String, dynamic>> posts = await _databaseHelper.fetchPosts();
     setState(() {
       _posts = posts
-        .where((post) => post['status'] == 'approved')
+        .where((post) => post['status'] == 'pending')
         .toList()
         .cast<Map<String, dynamic>>()
-        ..sort((a, b) => (b['id'] as int).compareTo(a['id'] as int)); 
+        ..sort((a, b) => (b['id'] as int).compareTo(a['id'] as int)); // Sort by descending ID
       _filteredPosts = _posts;
-      _isLoading = false; // Set loading to false after data is loaded
+      _isLoading = false;
     });
   }
 
@@ -165,11 +163,25 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
+  void _navigateToPostDetail(Map<String, dynamic> post) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostDetailPage(post: post),
+      ),
+    );
+
+    if (result == true) {
+      // Refresh posts if the result indicates that there was a change
+      _loadPosts();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Page'),
+        title: Text('Manage Posts'),
       ),
       drawer: AppDrawer(),
       body: Column(
@@ -243,12 +255,7 @@ class _MainPageState extends State<MainPage> {
                                   ],
                                 ),
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PostDetailPage(post: post),
-                                    ),
-                                  );
+                                  _navigateToPostDetail(post);
                                 },
                               ),
                               Divider(
@@ -265,23 +272,6 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
-      floatingActionButton: (_type == 'admin' || _type == 'employer')
-          ? FloatingActionButton(
-              onPressed: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreatePostPage(),
-                  ),
-                );
-                if (result == true) {
-                  // Refresh the posts if the result indicates that new data was added
-                  _loadPosts();
-                }
-              },
-              child: Icon(Icons.add),
-            )
-          : null,
     );
   }
 }
