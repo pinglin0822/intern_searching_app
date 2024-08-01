@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart'; // Import uuid for unique identifiers
@@ -11,6 +12,7 @@ class CreatePostPage extends StatefulWidget {
 }
 
 class _CreatePostPageState extends State<CreatePostPage> {
+  int _userId = 0;
   final _formKey = GlobalKey<FormState>(); // Key for form validation
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _companyNameController = TextEditingController();
@@ -46,6 +48,19 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
   final ImagePicker _picker = ImagePicker(); // Create an instance of ImagePicker
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userId = prefs.getInt('userId') ?? 0;
+    });
+  }
 
   Future<void> _pickImage() async {
     final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
@@ -324,7 +339,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     final post = {
                       'title': _titleController.text,
                       'imageName': imageName, // Use the unique image file name
-                      'userId': 1, // Replace with actual userId if available
+                      'userId': _userId, // Replace with actual userId if available
                       'companyName': _companyNameController.text,
                       'lowestSalary': double.tryParse(_lowestSalaryController.text) ?? 0,
                       'highestSalary': double.tryParse(_highestSalaryController.text) ?? 0,

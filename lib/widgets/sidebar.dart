@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main_page.dart';
 import '../login_page.dart';
 import '../manage_post.dart'; // Import the manage_post.dart file
+import '../my_post.dart'; // Import the my_post.dart file
 
 class AppDrawer extends StatefulWidget {
   @override
@@ -30,9 +31,10 @@ class _AppDrawerState extends State<AppDrawer> {
   Future<void> _logout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    Navigator.pushReplacement(
-      context,
+    // Use pushAndRemoveUntil to remove all routes below the LoginPage
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginPage()),
+      (Route<dynamic> route) => false,
     );
   }
 
@@ -84,9 +86,21 @@ class _AppDrawerState extends State<AppDrawer> {
                 );
               },
             ),
+          ],
+          // Conditionally show "My Posts" button for employers
+          if (_userType == 'employer' || _userType == 'admin') ...[
+            ListTile(
+              leading: Icon(Icons.post_add),
+              title: Text('My Posts'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyPostPage()),
+                );
+              },
+            ),
             Divider(),
           ],
-          Divider(),
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),

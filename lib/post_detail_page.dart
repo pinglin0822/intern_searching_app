@@ -15,21 +15,58 @@ class PostDetailPage extends StatefulWidget {
 class _PostDetailPageState extends State<PostDetailPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   String _userType = '';
+  int _userId = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadUserType();
+    _loadSessionData();
   }
 
-  Future<void> _loadUserType() async {
+  Future<void> _loadSessionData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _userType = prefs.getString('userType') ?? '';
+      _userId = prefs.getInt('userId') ?? 0;
     });
   }
 
-  Future<void> _showConfirmationDialog(BuildContext context, String newStatus, String message) async {
+  Future<void> _showConfirmationDialogDelete(
+      BuildContext context, String message) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Prevents dismissing by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Action'),
+          content: Text('Are you sure you want to $message this post?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deletePost();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Post deleted')),
+                );
+                Navigator.of(context)
+                    .pop(true); // Go back to the previous screen
+              },
+              child: Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showConfirmationDialog(
+      BuildContext context, String newStatus, String message) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // Prevents dismissing by tapping outside
@@ -51,7 +88,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Post status updated to $newStatus')),
                 );
-                Navigator.of(context).pop(true); // Go back to the previous screen
+                Navigator.of(context)
+                    .pop(true); // Go back to the previous screen
               },
               child: Text('Confirm'),
             ),
@@ -59,6 +97,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
         );
       },
     );
+  }
+
+  Future<void> _deletePost() async {
+    // Update the post's status in the database
+    await _databaseHelper.deletePost(widget.post['id']);
   }
 
   Future<void> _updatePostStatus(String newStatus) async {
@@ -129,6 +172,28 @@ class _PostDetailPageState extends State<PostDetailPage> {
               '${post['area']}',
               style: TextStyle(fontSize: 16),
             ),
+            SizedBox(height: 24.0),
+            Row(
+              children: [
+                if (_userType == 'admin' || _userId == post['userId']) ...[
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showConfirmationDialogDelete(context,'delete');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.red, // Background color
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child:
+                            Text('Delete Post', style: TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            )
           ],
         ),
       ),

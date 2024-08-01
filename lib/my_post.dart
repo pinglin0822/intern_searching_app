@@ -6,14 +6,15 @@ import 'widgets/sidebar.dart';
 import 'post_detail_page.dart';
 import 'create_post_page.dart';
 
-class MainPage extends StatefulWidget {
+class MyPostPage extends StatefulWidget {
   @override
-  _MainPageState createState() => _MainPageState();
+  _MyPostPageState createState() => _MyPostPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MyPostPageState extends State<MyPostPage> {
   String _username = '';
   String _type = '';
+  int _userId = 0;
   List<Map<String, dynamic>> _posts = [];
   List<Map<String, dynamic>> _filteredPosts = [];
   bool _isLoading = true; // New state variable to track loading state
@@ -21,7 +22,8 @@ class _MainPageState extends State<MainPage> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedArea = '';
   double _minSalary = 0;
-  final TextEditingController _minSalaryController = TextEditingController(text: '0');
+  final TextEditingController _minSalaryController =
+      TextEditingController(text: '0');
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _MainPageState extends State<MainPage> {
     setState(() {
       _username = prefs.getString('username') ?? '';
       _type = prefs.getString('userType') ?? '';
+      _userId = prefs.getInt('userId') ?? 0;
     });
   }
 
@@ -42,10 +45,10 @@ class _MainPageState extends State<MainPage> {
     List<Map<String, dynamic>> posts = await _databaseHelper.fetchPosts();
     setState(() {
       _posts = posts
-        .where((post) => post['status'] == 'approved')
-        .toList()
-        .cast<Map<String, dynamic>>()
-        ..sort((a, b) => (b['id'] as int).compareTo(a['id'] as int)); 
+          .where((post) => post['userId'] == _userId)
+          .toList()
+          .cast<Map<String, dynamic>>()
+        ..sort((a, b) => (b['id'] as int).compareTo(a['id'] as int));
       _filteredPosts = _posts;
       _isLoading = false; // Set loading to false after data is loaded
     });
@@ -63,11 +66,12 @@ class _MainPageState extends State<MainPage> {
         final isInCompanyName = companyNameLower.contains(searchLower);
         final isInArea = areaLower.contains(searchLower);
         final isInSalaryRange = post['lowestSalary'] >= _minSalary;
-        final isInAreaFilter = _selectedArea.isEmpty || areaLower == _selectedArea;
+        final isInAreaFilter =
+            _selectedArea.isEmpty || areaLower == _selectedArea;
 
         return (isInTitle || isInCompanyName || isInArea) &&
-               isInSalaryRange &&
-               isInAreaFilter;
+            isInSalaryRange &&
+            isInAreaFilter;
       }).toList();
     });
   }
@@ -107,7 +111,8 @@ class _MainPageState extends State<MainPage> {
                     'Terengganu',
                   ].map((area) {
                     return DropdownMenuItem<String>(
-                      value: area.toLowerCase() == 'any' ? '' : area.toLowerCase(),
+                      value:
+                          area.toLowerCase() == 'any' ? '' : area.toLowerCase(),
                       child: Text(area),
                     );
                   }).toList(),
@@ -169,7 +174,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Page'),
+        title: Text('My Posts'),
       ),
       drawer: AppDrawer(),
       body: Column(
@@ -239,7 +244,16 @@ class _MainPageState extends State<MainPage> {
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.arrow_right, size: 30),
+                                    Text(
+                                      post['status'],
+                                      style: TextStyle(
+                                        color: post['status'] == 'rejected'
+                                            ? Colors.red
+                                            : post['status'] == 'approved'
+                                                ? Colors.green
+                                                : Colors.black,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 onTap: () async {
