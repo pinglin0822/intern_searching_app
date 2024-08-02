@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
+import 'edit_post.dart';
 
 class PostDetailPage extends StatefulWidget {
   final Map<String, dynamic> post;
@@ -16,11 +17,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
   String _userType = '';
   int _userId = 0;
+  late Map<String, dynamic> _post;
 
   @override
   void initState() {
     super.initState();
     _loadSessionData();
+    _post = widget.post;
   }
 
   Future<void> _loadSessionData() async {
@@ -109,13 +112,27 @@ class _PostDetailPageState extends State<PostDetailPage> {
     await _databaseHelper.updatePostStatus(widget.post['id'], newStatus);
   }
 
+  void _refreshPostDetails(Map<String, dynamic> updatedPost) {
+    setState(() {
+      _post = updatedPost;
+    });
+  }
+
+  Future<bool> _onWillPop() async {
+    // Return true to indicate that the action was performed
+    Navigator.of(context).pop(true);
+    return false; // Prevent the default back action
+  }
+
   @override
   Widget build(BuildContext context) {
-    final post = widget.post;
+    final post = _post;
     final imagePath = post['imageName'] ?? 'no_Image.jpg';
     final filePath = File(imagePath);
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+    child: Scaffold(
       appBar: AppBar(
         title: Text(post['title']),
       ),
@@ -175,11 +192,36 @@ class _PostDetailPageState extends State<PostDetailPage> {
             SizedBox(height: 24.0),
             Row(
               children: [
+                if (_userId == post['userId']) ...[
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditPostPage(post: post,onUpdate: _refreshPostDetails,),
+                                    ),
+                                  );
+                                },
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child:
+                            Text('Edit Post', style: TextStyle(fontSize: 18)),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            SizedBox(height: 12.0),
+            Row(
+              children: [
                 if (_userType == 'admin' || _userId == post['userId']) ...[
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        _showConfirmationDialogDelete(context,'delete');
+                        _showConfirmationDialogDelete(context, 'delete');
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.red, // Background color
@@ -224,6 +266,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               ),
             )
           : null,
+    )
     );
   }
 }

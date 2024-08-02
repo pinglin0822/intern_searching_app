@@ -3,31 +3,36 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart'; // Import uuid for unique identifiers
-import 'database_helper.dart'; // Import your database helper
-import 'my_post.dart';
+import 'package:uuid/uuid.dart';
+import 'database_helper.dart';
 
-class CreatePostPage extends StatefulWidget {
+class EditPostPage extends StatefulWidget {
+  final Map<String, dynamic> post;
+  final Function(Map<String, dynamic>) onUpdate;
+
+  EditPostPage({required this.post, required this.onUpdate});
+
   @override
-  _CreatePostPageState createState() => _CreatePostPageState();
+  _EditPostPageState createState() => _EditPostPageState();
 }
 
-class _CreatePostPageState extends State<CreatePostPage> {
+class _EditPostPageState extends State<EditPostPage> {
   int _userId = 0;
-  final _formKey = GlobalKey<FormState>(); // Key for form validation
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _companyNameController = TextEditingController();
   final TextEditingController _lowestSalaryController = TextEditingController();
-  final TextEditingController _highestSalaryController = TextEditingController();
+  final TextEditingController _highestSalaryController =
+      TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _registrationNoController = TextEditingController();
+  final TextEditingController _registrationNoController =
+      TextEditingController();
 
-  String? _selectedArea; // Variable to store the selected area
-  XFile? _image; // Variable to store the selected image
+  String? _selectedArea;
+  XFile? _image;
 
-  // List of areas for the dropdown
   final List<String> _areas = [
     'Johor',
     'Kedah',
@@ -45,15 +50,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
     'Terengganu',
   ];
 
-  // Create an instance of your database helper
   final DatabaseHelper _databaseHelper = DatabaseHelper();
-
-  final ImagePicker _picker = ImagePicker(); // Create an instance of ImagePicker
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
     _loadUserId();
+    _loadPostData();
   }
 
   Future<void> _loadUserId() async {
@@ -63,8 +67,23 @@ class _CreatePostPageState extends State<CreatePostPage> {
     });
   }
 
+  void _loadPostData() {
+    final post = widget.post;
+    _titleController.text = post['title'];
+    _companyNameController.text = post['companyName'];
+    _lowestSalaryController.text = post['lowestSalary'].toString();
+    _highestSalaryController.text = post['highestSalary'].toString();
+    _descriptionController.text = post['description'];
+    _longitudeController.text = post['longitude'].toString();
+    _latitudeController.text = post['latitude'].toString();
+    _registrationNoController.text = post['registration_no'];
+    _selectedArea = post['area'];
+    _image = XFile(post['imageName']);
+  }
+
   Future<void> _pickImage() async {
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image = pickedImage;
     });
@@ -73,9 +92,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Future<String> _saveImageToFile(XFile image) async {
     final directory = await getApplicationDocumentsDirectory();
     final path = '${directory.path}/images/';
-    final uniqueName = Uuid().v4(); // Generate a unique name
-    final file = File('${path}${uniqueName}_${image.name}');
-    await file.create(recursive: true); // Ensure the directory exists
+    final uniqueName = Uuid().v4();
+    final file = File('$path$uniqueName');
+    await file.create(recursive: true);
     await file.writeAsBytes(await image.readAsBytes());
     return file.path;
   }
@@ -84,12 +103,12 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Post'),
+        title: Text('Edit Post'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // Form key for validation
+          key: _formKey,
           child: ListView(
             children: [
               Column(
@@ -167,13 +186,16 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       ),
                       SizedBox(width: 16.0),
                       if (_image != null)
-                        Text(
-                          'Image Selected: ${_image!.name}', // Show the image file name
-                          style: TextStyle(fontSize: 16.0),
+                        Flexible(
+                          child: Text(
+                            'Image Selected: ${_image!.name}',
+                            style: TextStyle(fontSize: 16.0),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                   ),
-                  if (_image != null) 
+                  if (_image != null)
                     Padding(
                       padding: EdgeInsets.only(top: 8.0),
                       child: Image.file(
@@ -295,7 +317,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter the longitude';
@@ -316,7 +337,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                     ),
-                    keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter the latitude';
@@ -328,51 +348,45 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 ],
               ),
               ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    // Save the image file to the app's directory
-                    String imageName = '';
-                    if (_image != null) {
-                      imageName = await _saveImageToFile(_image!);
-                    }
-
-                    // Collect form data
-                    final post = {
-                      'title': _titleController.text,
-                      'imageName': imageName, // Use the unique image file name
-                      'userId': _userId, // Replace with actual userId if available
-                      'companyName': _companyNameController.text,
-                      'lowestSalary': double.tryParse(_lowestSalaryController.text) ?? 0,
-                      'highestSalary': double.tryParse(_highestSalaryController.text) ?? 0,
-                      'description': _descriptionController.text,
-                      'area': _selectedArea ?? '',
-                      'longitude': double.tryParse(_longitudeController.text) ?? 0,
-                      'latitude': double.tryParse(_latitudeController.text) ?? 0,
-                      'status': 'pending', // Default status
-                      'registration_no': _registrationNoController.text,
-                    };
-
-                    // Save post using the insertPost method from DatabaseHelper
-                    await _databaseHelper.insertPost(post);
-
-                    // Show a confirmation message or navigate back
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Post saved successfully! please wait for admin to approve the post!')),
-                    );
-
-                    // Optionally, navigate back to the previous screen
-                    Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyPostPage()),  // Navigate to MainPage
-        );
-                  }
-                },
-                child: Text('Save Post'),
+                onPressed: _savePost,
+                child: Text('Save'),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _savePost() async {
+    if (_formKey.currentState!.validate()) {
+      String imagePath = widget.post['imageName'];
+      if (_image != null) {
+        imagePath = await _saveImageToFile(_image!);
+      }
+
+      Map<String, dynamic> updatedPost = {
+        'id': widget.post['id'],
+        'title': _titleController.text,
+        'companyName': _companyNameController.text,
+        'lowestSalary': double.tryParse(_lowestSalaryController.text) ?? 0.0,
+        'highestSalary': double.tryParse(_highestSalaryController.text) ?? 0.0,
+        'description': _descriptionController.text,
+        'longitude': double.tryParse(_longitudeController.text) ?? 0.0,
+        'latitude': double.tryParse(_latitudeController.text) ?? 0.0,
+        'registration_no': _registrationNoController.text,
+        'area': _selectedArea,
+        'imageName': imagePath,
+        'userId': _userId,
+        'status': 'pending',
+      };
+
+      await _databaseHelper.updatePost(widget.post['id'], updatedPost);
+      widget.onUpdate(updatedPost);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Post edited successfully! please wait for admin to approve the post!')),
+      );
+      Navigator.pop(context, true);
+    }
   }
 }
