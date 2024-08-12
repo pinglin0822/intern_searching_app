@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
 import 'edit_post.dart';
+import 'create_application.dart';
+import 'view_applicant.dart';
 
 class PostDetailPage extends StatefulWidget {
   final Map<String, dynamic> post;
@@ -131,142 +133,200 @@ class _PostDetailPageState extends State<PostDetailPage> {
     final filePath = File(imagePath);
 
     return WillPopScope(
-      onWillPop: _onWillPop,
-    child: Scaffold(
-      appBar: AppBar(
-        title: Text(post['title']),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Image.file(
-              filePath,
-              width: double.infinity,
-              height: 200,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'lib/image/no_Image.jpg',
+        onWillPop: _onWillPop,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(post['title']),
+          ),
+          body: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: ListView(
+              children: [
+                Image.file(
+                  filePath,
                   width: double.infinity,
                   height: 200,
                   fit: BoxFit.cover,
-                );
-              },
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              post['title'],
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              post['companyName'],
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'From RM${post['lowestSalary']} to RM${post['highestSalary']}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              'Job Description and Requirement:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              post['description'] ?? 'No description provided',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 24.0),
-            Text(
-              'Location:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              '${post['area']}',
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 24.0),
-            Row(
-              children: [
-                if (_userId == post['userId']) ...[
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                                  final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          EditPostPage(post: post,onUpdate: _refreshPostDetails,),
-                                    ),
-                                  );
-                                },
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child:
-                            Text('Edit Post', style: TextStyle(fontSize: 18)),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'lib/image/no_Image.jpg',
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    );
+                  },
+                ),
+                SizedBox(height: 16.0),
+                Text(
+                  post['title'],
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8.0),
+                Text(
+                  post['companyName'],
+                  style: TextStyle(fontSize: 18),
+                ),
+                SizedBox(height: 16.0),
+                Text(
+                  'From RM${post['lowestSalary']} to RM${post['highestSalary']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 16.0),
+                Text(
+                  'Job Description and Requirement:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8.0),
+                Text(
+                  post['description'] ?? 'No description provided',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 24.0),
+                Text(
+                  'Location:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  '${post['area']}',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 24.0),
+                Row(
+                  children: [
+                    if (_userType == 'student') ...[
+                      SizedBox(height: 50.0),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateApplicationPage(postId: post['id'],),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text('Apply Post',
+                                style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    ],
+                  ],
+                ),
+                
+                Row(
+                  children: [
+                    if (_userId == post['userId']) ...[
+                      SizedBox(height: 50.0),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ViewApplicantPage(
+                                  post: post,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text('View Applicants',
+                                style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                
+                Row(
+                  children: [
+                    if (_userId == post['userId']) ...[
+                      SizedBox(height: 50.0),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditPostPage(
+                                  post: post,
+                                  onUpdate: _refreshPostDetails,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text('Edit Post',
+                                style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                
+                Row(
+                  children: [
+                    if (_userType == 'admin' || _userId == post['userId']) ...[
+                      SizedBox(height: 80.0),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _showConfirmationDialogDelete(context, 'delete');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red, // Background color
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text('Delete Post',
+                                style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                SizedBox(height: 50.0),
               ],
             ),
-            SizedBox(height: 12.0),
-            Row(
-              children: [
-                if (_userType == 'admin' || _userId == post['userId']) ...[
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _showConfirmationDialogDelete(context, 'delete');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.red, // Background color
+          ),
+          bottomNavigationBar:
+              (_userType == 'admin' && post['status'] == 'pending')
+                  ? BottomAppBar(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              _showConfirmationDialog(
+                                  context, 'approved', 'approve');
+                            },
+                            child: Text(
+                              'Approve',
+                              style: TextStyle(color: Colors.green),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              _showConfirmationDialog(
+                                  context, 'rejected', 'reject');
+                            },
+                            child: Text(
+                              'Reject',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child:
-                            Text('Delete Post', style: TextStyle(fontSize: 18)),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            )
-          ],
-        ),
-      ),
-      bottomNavigationBar: (_userType == 'admin' && post['status'] == 'pending')
-          ? BottomAppBar(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      _showConfirmationDialog(context, 'approved', 'approve');
-                    },
-                    child: Text(
-                      'Approve',
-                      style: TextStyle(color: Colors.green),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      _showConfirmationDialog(context, 'rejected', 'reject');
-                    },
-                    child: Text(
-                      'Reject',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : null,
-    )
-    );
+                    )
+                  : null,
+        ));
   }
 }

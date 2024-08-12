@@ -31,6 +31,9 @@ class DatabaseHelper {
     await db.execute(
       "CREATE TABLE posts(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, imageName TEXT, userId INTEGER, companyName TEXT, lowestSalary REAL, highestSalary REAL, description TEXT, area TEXT, longitude REAL, latitude REAL, status TEXT, registration_no TEXT, FOREIGN KEY (userId) REFERENCES users (id))",
     );
+    await db.execute(
+      "CREATE TABLE applicants(id INTEGER PRIMARY KEY AUTOINCREMENT, postId INTEGER, userId INTEGER, name TEXT, resume TEXT, contactNo TEXT, email TEXT, description TEXT, FOREIGN KEY (postId) REFERENCES posts (id), FOREIGN KEY (userId) REFERENCES users (id))",
+    );
 
     await db.insert(
       'users',
@@ -39,42 +42,6 @@ class DatabaseHelper {
         'password': 'adminpassword',
         'email': 'admin@gmail.com',
         'userType': 'admin',
-      },
-      
-    );
-    await db.insert(
-      'posts',
-      {
-        'title': 'Junior Developer',
-        'imageName': 'junior_dev.png',
-        'userId': 1, // assuming the dummy user has id 1
-        'companyName': 'Tech Corp',
-        'lowestSalary': 3000.00,
-        'highestSalary': 5000.00,
-        'description': 'A great opportunity for junior developers.',
-        'longitude': 101.6869,
-        'latitude': 3.1390,
-        'status': 'approved',
-        'registration_no': 'JUN123',
-        'area': 'Kuala Lumpur',
-      },
-    );
-
-    await db.insert(
-      'posts',
-      {
-        'title': 'Senior Developer',
-        'imageName': 'senior_dev.png',
-        'userId': 1, // assuming the dummy user has id 1
-        'companyName': 'Innovate Ltd',
-        'lowestSalary': 6000.00,
-        'highestSalary': 9000.00,
-        'description': 'Looking for experienced senior developers.',
-        'longitude': 100.5018,
-        'latitude': 13.7563,
-        'status': 'approved',
-        'registration_no': 'SEN456',
-        'area': 'Johor',
       },
     );
   }
@@ -144,14 +111,14 @@ class DatabaseHelper {
   }
 
   Future<void> updatePostStatus(int postId, String newStatus) async {
-  final db = await database;
-  await db.update(
-    'posts',
-    {'status': newStatus},
-    where: 'id = ?',
-    whereArgs: [postId],
-  );
-}
+    final db = await database;
+    await db.update(
+      'posts',
+      {'status': newStatus},
+      where: 'id = ?',
+      whereArgs: [postId],
+    );
+  }
 
   // Delete Post
   Future<void> deletePost(int id) async {
@@ -162,4 +129,24 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
+
+  Future<void> insertApplicant(Map<String, dynamic> applicant) async {
+    final db = await database;
+    await db.insert(
+      'applicants',
+      applicant,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getApplicantsForPost(int postId) async {
+  final db = await database;
+  return await db.query(
+    'applicants',
+    where: 'postId = ?',
+    whereArgs: [postId],
+  );
+}
+
+
 }
