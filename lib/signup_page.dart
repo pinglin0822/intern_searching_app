@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'database_helper.dart';
 
 class SignupPage extends StatefulWidget {
+  const SignupPage({Key? key}) : super(key: key);
+
   @override
   _SignupPageState createState() => _SignupPageState();
 }
@@ -31,7 +33,7 @@ class _SignupPageState extends State<SignupPage> {
       await _databaseHelper.insertUser(user);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Signup successful!')),
+        const SnackBar(content: Text('Signup successful!')),
       );
 
       // Optionally, navigate to the login page or home page
@@ -42,16 +44,16 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sign Up')),
+      appBar: AppBar(title: const Text('Sign Up')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: <Widget>[
               TextFormField(
                 controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+                decoration: const InputDecoration(labelText: 'Username'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your username';
@@ -61,7 +63,7 @@ class _SignupPageState extends State<SignupPage> {
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -72,7 +74,7 @@ class _SignupPageState extends State<SignupPage> {
               ),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: const InputDecoration(labelText: 'Email'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -80,7 +82,7 @@ class _SignupPageState extends State<SignupPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               Row(
                 children: [
                   Expanded(
@@ -113,10 +115,10 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () => _signup(context),
-                child: Text('Sign Up'),
+                child: const Text('Sign Up'),
               ),
             ],
           ),

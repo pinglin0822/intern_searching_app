@@ -3,18 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart'; // Import uuid for unique identifiers
-import 'database_helper.dart'; // Import your database helper
+import 'package:uuid/uuid.dart';
+import 'database_helper.dart';
 import 'my_post.dart';
+// Import Google Maps package
+import 'package:geocoding/geocoding.dart'; // Import for geocoding (converting address to coordinates)
+import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
+import 'package:google_places_autocomplete_text_field/model/prediction.dart';
 
 class CreatePostPage extends StatefulWidget {
+  const CreatePostPage({Key? key}) : super(key: key);
+
   @override
   _CreatePostPageState createState() => _CreatePostPageState();
 }
 
 class _CreatePostPageState extends State<CreatePostPage> {
   int _userId = 0;
-  final _formKey = GlobalKey<FormState>(); // Key for form validation
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _companyNameController = TextEditingController();
   final TextEditingController _lowestSalaryController = TextEditingController();
@@ -23,32 +29,18 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
   final TextEditingController _registrationNoController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController(); // New controller for the address
 
-  String? _selectedArea; // Variable to store the selected area
-  XFile? _image; // Variable to store the selected image
+  String? _selectedArea;
+  XFile? _image;
 
-  // List of areas for the dropdown
   final List<String> _areas = [
-    'Johor',
-    'Kedah',
-    'Kelantan',
-    'Kuala Lumpur',
-    'Melaka',
-    'Negeri Sembilan',
-    'Pahang',
-    'Perak',
-    'Perlis',
-    'Penang',
-    'Sabah',
-    'Sarawak',
-    'Selangor',
-    'Terengganu',
+    'Johor', 'Kedah', 'Kelantan', 'Kuala Lumpur', 'Melaka', 'Negeri Sembilan',
+    'Pahang', 'Perak', 'Perlis', 'Penang', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu',
   ];
 
-  // Create an instance of your database helper
   final DatabaseHelper _databaseHelper = DatabaseHelper();
-
-  final ImagePicker _picker = ImagePicker(); // Create an instance of ImagePicker
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -73,35 +65,51 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Future<String> _saveImageToFile(XFile image) async {
     final directory = await getApplicationDocumentsDirectory();
     final path = '${directory.path}/images/';
-    final uniqueName = Uuid().v4(); // Generate a unique name
-    final file = File('${path}${uniqueName}_${image.name}');
-    await file.create(recursive: true); // Ensure the directory exists
+    final uniqueName = const Uuid().v4();
+    final file = File('$path${uniqueName}_${image.name}');
+    await file.create(recursive: true);
     await file.writeAsBytes(await image.readAsBytes());
     return file.path;
+  }
+
+  Future<void> _getCoordinatesFromAddress() async {
+    try {
+      List<Location> locations = await locationFromAddress(_addressController.text);
+      if (locations.isNotEmpty) {
+        setState(() {
+          _latitudeController.text = locations[0].latitude.toString();
+          _longitudeController.text = locations[0].longitude.toString();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No coordinates found for this address')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error finding address')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Create Post'),
+        title: const Text('Create Post'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // Form key for validation
-          child: ListView(
-            children: [
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: 
               Column(
+                children: [
+                  Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Job Title', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Job Title', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _titleController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a job title';
@@ -109,19 +117,17 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Company Name', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Company Name', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _companyNameController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a company name';
@@ -129,19 +135,17 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Registration Number', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Registration Number', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _registrationNoController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a registration number';
@@ -149,33 +153,33 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Image Upload', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Image Upload', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton(
                           onPressed: _pickImage,
-                          child: Text('Pick Image'),
+                          child: const Text('Pick Image'),
                         ),
                       ),
-                      SizedBox(width: 16.0),
+                      const SizedBox(width: 16.0),
                       if (_image != null)
                         Text(
-                          'Image Selected: ${_image!.name}', // Show the image file name
-                          style: TextStyle(fontSize: 16.0),
+                          '${_image!.name}',
+                          style: const TextStyle(fontSize: 16.0),
                         ),
                     ],
                   ),
-                  if (_image != null) 
+                  if (_image != null)
                     Padding(
-                      padding: EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.only(top: 8.0),
                       child: Image.file(
                         File(_image!.path),
                         height: 100,
@@ -183,19 +187,17 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Job Area', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Job Area', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   DropdownButtonFormField<String>(
                     value: _selectedArea,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                     items: _areas.map((String area) {
                       return DropdownMenuItem<String>(
                         value: area,
@@ -213,23 +215,23 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       }
                       return null;
                     },
-                    hint: Text('Select Area'),
+                    hint: const Text('Select Area'),
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Salary', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Salary', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   Row(
                     children: [
-                      Text('From ', style: TextStyle(fontSize: 16.0)),
+                      const Text('From ', style: TextStyle(fontSize: 16.0)),
                       Expanded(
                         child: TextFormField(
                           controller: _lowestSalaryController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Lowest Salary',
                             border: OutlineInputBorder(),
                           ),
@@ -242,11 +244,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
                           },
                         ),
                       ),
-                      Text(' to ', style: TextStyle(fontSize: 16.0)),
+                      const Text(' to ', style: TextStyle(fontSize: 16.0)),
                       Expanded(
                         child: TextFormField(
                           controller: _highestSalaryController,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             labelText: 'Highest Salary',
                             border: OutlineInputBorder(),
                           ),
@@ -261,19 +263,17 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Job Description', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Job Description', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(border: OutlineInputBorder()),
                     maxLines: 4,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -282,94 +282,128 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Longitude', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
-                  TextFormField(
-                    controller: _longitudeController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the longitude';
-                      }
-                      return null;
-                    },
+                  const Text('Address', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
+                  GooglePlacesAutoCompleteTextFormField(
+                textEditingController: _addressController,
+                googleAPIKey: "AIzaSyBUjSAHP6GNjLJCYQe02yCu5wbZiNLznA4",
+                decoration: const InputDecoration(
+                  hintText: 'Enter your address',
+                  labelText: 'Address',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter some text';
+                  }
+                  return null;
+                },
+                // proxyURL: _yourProxyURL,
+                maxLines: 1,
+                overlayContainer: (child) => Material(
+                  elevation: 1.0,
+                  //color: Colors.green,
+                  borderRadius: BorderRadius.circular(12),
+                  child: child,
+                ),
+                getPlaceDetailWithLatLng: (prediction) {
+                  print('placeDetails${prediction.lng}');
+                },
+                itmClick: (Prediction prediction) =>
+                    _addressController.text = prediction.description!,
+              ),
+                  const SizedBox(height: 8.0),
+                  ElevatedButton(
+                    onPressed: _getCoordinatesFromAddress,
+                    child: const Text('Get Coordinates'),
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Latitude', style: TextStyle(fontSize: 16.0)),
-                  SizedBox(height: 8.0),
+                  const Text('Latitude', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _latitudeController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter the latitude';
+                        return 'Please enter a latitude';
                       }
                       return null;
                     },
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                 ],
               ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Longitude', style: TextStyle(fontSize: 16.0)),
+                  const SizedBox(height: 8.0),
+                  TextFormField(
+                    controller: _longitudeController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a longitude';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16.0),
+                ],
+              ),
+              const SizedBox(height: 32.0),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // Save the image file to the app's directory
-                    String imageName = '';
+                    String? imagePath;
                     if (_image != null) {
-                      imageName = await _saveImageToFile(_image!);
+                      imagePath = await _saveImageToFile(_image!);
                     }
 
-                    // Collect form data
                     final post = {
-                      'title': _titleController.text,
-                      'imageName': imageName, // Use the unique image file name
-                      'userId': _userId, // Replace with actual userId if available
-                      'companyName': _companyNameController.text,
-                      'lowestSalary': double.tryParse(_lowestSalaryController.text) ?? 0,
-                      'highestSalary': double.tryParse(_highestSalaryController.text) ?? 0,
-                      'description': _descriptionController.text,
-                      'area': _selectedArea ?? '',
-                      'longitude': double.tryParse(_longitudeController.text) ?? 0,
-                      'latitude': double.tryParse(_latitudeController.text) ?? 0,
-                      'status': 'pending', // Default status
-                      'registration_no': _registrationNoController.text,
+                      'userId': _userId,
+                      'title': _titleController.text ?? "error",
+                      'companyName': _companyNameController.text ?? 'error',
+                      'lowestSalary': int.parse(_lowestSalaryController.text) ?? 0,
+                      'highestSalary': int.parse(_highestSalaryController.text) ?? 0,
+                      'description': _descriptionController.text ?? 'error',
+                      'longitude': double.parse(_longitudeController.text) ?? 0,
+                      'latitude': double.parse(_latitudeController.text) ?? 0,
+                      'registration_no': _registrationNoController.text ?? 'error',
+                      'status': 'pending',
+                      'area': _selectedArea ?? 'error',
+                      'imageName': imagePath,
                     };
 
-                    // Save post using the insertPost method from DatabaseHelper
                     await _databaseHelper.insertPost(post);
-
-                    // Show a confirmation message or navigate back
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Post saved successfully! please wait for admin to approve the post!')),
-                    );
-
-                    // Optionally, navigate back to the previous screen
                     Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyPostPage()),  // Navigate to MainPage
-        );
+                      context,
+                      MaterialPageRoute(builder: (context) => const MyPostPage()),
+                    );
                   }
                 },
-                child: Text('Save Post'),
+                child: const Text('Create Post'),
               ),
             ],
+              )
+              
           ),
         ),
       ),

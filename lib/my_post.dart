@@ -7,6 +7,8 @@ import 'post_detail_page.dart';
 import 'create_post_page.dart';
 
 class MyPostPage extends StatefulWidget {
+  const MyPostPage({Key? key}) : super(key: key);
+
   @override
   _MyPostPageState createState() => _MyPostPageState();
 }
@@ -81,18 +83,18 @@ class _MyPostPageState extends State<MyPostPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Filter Posts'),
+          title: const Text('Filter Posts'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text('Area:'),
                 ),
                 DropdownButtonFormField<String>(
                   value: _selectedArea.isNotEmpty ? _selectedArea : null,
-                  hint: Text('Select Area'),
+                  hint: const Text('Select Area'),
                   items: [
                     'Any',
                     'Johor',
@@ -122,16 +124,16 @@ class _MyPostPageState extends State<MyPostPage> {
                     });
                   },
                 ),
-                SizedBox(height: 16.0),
-                Align(
+                const SizedBox(height: 16.0),
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text('Minimum Salary:'),
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 TextField(
                   controller: _minSalaryController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Min Salary',
                     border: OutlineInputBorder(),
                   ),
@@ -150,7 +152,7 @@ class _MyPostPageState extends State<MyPostPage> {
                 Navigator.of(context).pop();
                 _filterPosts(_searchController.text);
               },
-              child: Text('Apply'),
+              child: const Text('Apply'),
             ),
             TextButton(
               onPressed: () {
@@ -162,7 +164,7 @@ class _MyPostPageState extends State<MyPostPage> {
                 });
                 _filterPosts(_searchController.text);
               },
-              child: Text('Reset'),
+              child: const Text('Reset'),
             ),
           ],
         );
@@ -174,13 +176,13 @@ class _MyPostPageState extends State<MyPostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Posts'),
+        title: const Text('My Posts'),
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Expanded(
@@ -188,7 +190,7 @@ class _MyPostPageState extends State<MyPostPage> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search posts...',
-                      prefixIcon: Icon(Icons.search),
+                      prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -196,9 +198,9 @@ class _MyPostPageState extends State<MyPostPage> {
                     onChanged: _filterPosts,
                   ),
                 ),
-                SizedBox(width: 8.0),
+                const SizedBox(width: 8.0),
                 IconButton(
-                  icon: Icon(Icons.filter_list, size: 30),
+                  icon: const Icon(Icons.filter_list, size: 30),
                   onPressed: _showFilterDialog,
                 ),
               ],
@@ -206,7 +208,7 @@ class _MyPostPageState extends State<MyPostPage> {
           ),
           Expanded(
             child: _isLoading
-                ? Center(
+                ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : _filteredPosts.isNotEmpty
@@ -270,7 +272,7 @@ class _MyPostPageState extends State<MyPostPage> {
                                   }
                                 },
                               ),
-                              Divider(
+                              const Divider(
                                 height: 5,
                                 thickness: 2,
                               ),
@@ -278,7 +280,7 @@ class _MyPostPageState extends State<MyPostPage> {
                           );
                         },
                       )
-                    : Center(
+                    : const Center(
                         child: Text('No posts found'),
                       ),
           ),
@@ -298,7 +300,7 @@ class _MyPostPageState extends State<MyPostPage> {
                   _loadPosts();
                 }
               },
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
     );

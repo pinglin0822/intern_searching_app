@@ -4,8 +4,11 @@ import '../main_page.dart';
 import '../login_page.dart';
 import '../manage_post.dart'; // Import the manage_post.dart file
 import '../my_post.dart'; // Import the my_post.dart file
+import '../question_page.dart';
 
 class AppDrawer extends StatefulWidget {
+  const AppDrawer({Key? key}) : super(key: key);
+
   @override
   _AppDrawerState createState() => _AppDrawerState();
 }
@@ -33,7 +36,7 @@ class _AppDrawerState extends State<AppDrawer> {
     await prefs.clear();
     // Use pushAndRemoveUntil to remove all routes below the LoginPage
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginPage()),
+      MaterialPageRoute(builder: (context) => const LoginPage()),
       (Route<dynamic> route) => false,
     );
   }
@@ -44,10 +47,10 @@ class _AppDrawerState extends State<AppDrawer> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: <Widget>[
-          Container(
+          SizedBox(
             height: 100.0, // Set the height you want for the header
             child: DrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.blue,
               ),
               child: Column(
@@ -55,9 +58,9 @@ class _AppDrawerState extends State<AppDrawer> {
                 children: <Widget>[
                   Text(
                     'Welcome, $_username!',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 20,
                     ),
                   ),
                 ],
@@ -65,24 +68,34 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
             onTap: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => MainPage()),
+                MaterialPageRoute(builder: (context) => const MainPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('question'),
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => QuestionPage()),
               );
             },
           ),
           // Conditionally show "Manage Post" button for admins
           if (_userType == 'admin') ...[
             ListTile(
-              leading: Icon(Icons.manage_accounts),
-              title: Text('Manage Posts'),
+              leading: const Icon(Icons.manage_accounts),
+              title: const Text('Manage Posts'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ManagePostPage()),
+                  MaterialPageRoute(builder: (context) => const ManagePostPage()),
                 );
               },
             ),
@@ -90,20 +103,20 @@ class _AppDrawerState extends State<AppDrawer> {
           // Conditionally show "My Posts" button for employers
           if (_userType == 'employer' || _userType == 'admin') ...[
             ListTile(
-              leading: Icon(Icons.post_add),
-              title: Text('My Posts'),
+              leading: const Icon(Icons.post_add),
+              title: const Text('My Posts'),
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => MyPostPage()),
+                  MaterialPageRoute(builder: (context) => const MyPostPage()),
                 );
               },
             ),
-            Divider(),
+            const Divider(),
           ],
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
             onTap: _logout,
           ),
         ],

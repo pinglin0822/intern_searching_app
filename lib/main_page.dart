@@ -5,8 +5,12 @@ import 'database_helper.dart';
 import 'widgets/sidebar.dart';
 import 'post_detail_page.dart';
 import 'create_post_page.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
+
   @override
   _MainPageState createState() => _MainPageState();
 }
@@ -21,7 +25,11 @@ class _MainPageState extends State<MainPage> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedArea = '';
   double _minSalary = 0;
-  final TextEditingController _minSalaryController = TextEditingController(text: '0');
+  final TextEditingController _minSalaryController =
+      TextEditingController(text: '0');
+  String _statusText = 'Search for posts by title, company, or area';
+  List<String> _suggestions = [];
+  final String _apiKey = 'sk-X6pD1ld26wH7OgVfLldYTySnjeNb2Wj8EnPJKAO1d2KdSpZO';
 
   @override
   void initState() {
@@ -42,16 +50,20 @@ class _MainPageState extends State<MainPage> {
     List<Map<String, dynamic>> posts = await _databaseHelper.fetchPosts();
     setState(() {
       _posts = posts
-        .where((post) => post['status'] == 'approved')
-        .toList()
-        .cast<Map<String, dynamic>>()
-        ..sort((a, b) => (b['id'] as int).compareTo(a['id'] as int)); 
+          .where((post) => post['status'] == 'approved')
+          .toList()
+          .cast<Map<String, dynamic>>()
+        ..sort((a, b) => (b['id'] as int).compareTo(a['id'] as int));
       _filteredPosts = _posts;
       _isLoading = false; // Set loading to false after data is loaded
     });
   }
 
-  void _filterPosts(String query) {
+  void _filterPosts() async {
+    final query = _searchController.text;
+    if (query.isNotEmpty) {
+      await _generateKeywords(query);
+    }
     setState(() {
       _filteredPosts = _posts.where((post) {
         final titleLower = post['title'].toLowerCase();
@@ -63,13 +75,63 @@ class _MainPageState extends State<MainPage> {
         final isInCompanyName = companyNameLower.contains(searchLower);
         final isInArea = areaLower.contains(searchLower);
         final isInSalaryRange = post['lowestSalary'] >= _minSalary;
-        final isInAreaFilter = _selectedArea.isEmpty || areaLower == _selectedArea;
+        final isInAreaFilter =
+            _selectedArea.isEmpty || areaLower == _selectedArea;
 
         return (isInTitle || isInCompanyName || isInArea) &&
-               isInSalaryRange &&
-               isInAreaFilter;
+            isInSalaryRange &&
+            isInAreaFilter;
       }).toList();
+      _statusText =
+          "Keywords that you may also interested: ${_suggestions.join(', ')}";
+      if (query.isEmpty) {
+        _statusText = '';
+      }
     });
+  }
+
+  Future<void> _generateKeywords(String query) async {
+    final url = Uri.parse('https://api.chatanywhere.tech/v1/chat/completions');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'model': 'gpt-3.5-turbo', // Use gpt-3.5-turbo or gpt-4
+          'messages': [
+            {
+              'role': 'system',
+              'content': 'You are a helpful assistant.',
+            },
+            {
+              'role': 'user',
+              'content': 'Generate 5 similar job title keywords for: $query',
+            },
+          ],
+          'max_tokens': 50,
+          'temperature': 0.7,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('Response Data: $data'); // Log the response data for debugging
+        final String text = data['choices'][0]['message']['content'].trim();
+        final List<String> keywords = text.split('\n');
+        setState(() {
+          _suggestions = keywords.map((keyword) => keyword.trim()).toList();
+        });
+      } else {
+        print(
+            'Failed to generate keywords. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
   }
 
   void _showFilterDialog() {
@@ -77,18 +139,18 @@ class _MainPageState extends State<MainPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Filter Posts'),
+          title: const Text('Filter Posts'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text('Area:'),
                 ),
                 DropdownButtonFormField<String>(
                   value: _selectedArea.isNotEmpty ? _selectedArea : null,
-                  hint: Text('Select Area'),
+                  hint: const Text('Select Area'),
                   items: [
                     'Any',
                     'Johor',
@@ -107,7 +169,8 @@ class _MainPageState extends State<MainPage> {
                     'Terengganu',
                   ].map((area) {
                     return DropdownMenuItem<String>(
-                      value: area.toLowerCase() == 'any' ? '' : area.toLowerCase(),
+                      value:
+                          area.toLowerCase() == 'any' ? '' : area.toLowerCase(),
                       child: Text(area),
                     );
                   }).toList(),
@@ -117,16 +180,16 @@ class _MainPageState extends State<MainPage> {
                     });
                   },
                 ),
-                SizedBox(height: 16.0),
-                Align(
+                const SizedBox(height: 16.0),
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text('Minimum Salary:'),
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 TextField(
                   controller: _minSalaryController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Min Salary',
                     border: OutlineInputBorder(),
                   ),
@@ -143,9 +206,9 @@ class _MainPageState extends State<MainPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _filterPosts(_searchController.text);
+                _filterPosts();
               },
-              child: Text('Apply'),
+              child: const Text('Apply'),
             ),
             TextButton(
               onPressed: () {
@@ -155,9 +218,9 @@ class _MainPageState extends State<MainPage> {
                   _minSalary = 0;
                   _minSalaryController.text = _minSalary.toString();
                 });
-                _filterPosts(_searchController.text);
+                _filterPosts();
               },
-              child: Text('Reset'),
+              child: const Text('Reset'),
             ),
           ],
         );
@@ -169,13 +232,13 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Main Page'),
+        title: const Text('Main Page'),
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
@@ -183,25 +246,38 @@ class _MainPageState extends State<MainPage> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search posts...',
-                      prefixIcon: Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    onChanged: _filterPosts,
                   ),
                 ),
-                SizedBox(width: 8.0),
+                const SizedBox(width: 4.0),
                 IconButton(
-                  icon: Icon(Icons.filter_list, size: 30),
+                  icon: const Icon(Icons.search, size: 30),
+                  onPressed: _filterPosts,
+                ),
+                const SizedBox(width: 4.0),
+                IconButton(
+                  icon: const Icon(Icons.filter_list, size: 30),
                   onPressed: _showFilterDialog,
                 ),
               ],
             ),
           ),
+          _statusText.isNotEmpty ? Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            color: Colors.yellow[100], // Light yellow background color
+            child: Text(
+              _statusText,
+              style: const TextStyle(
+                fontSize: 16.0,
+              ),
+            ),
+          ):Container(),
           Expanded(
             child: _isLoading
-                ? Center(
+                ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : _filteredPosts.isNotEmpty
@@ -236,7 +312,7 @@ class _MainPageState extends State<MainPage> {
                                     Text(post['area']),
                                   ],
                                 ),
-                                trailing: Row(
+                                trailing: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.arrow_right, size: 30),
@@ -256,7 +332,7 @@ class _MainPageState extends State<MainPage> {
                                   }
                                 },
                               ),
-                              Divider(
+                              const Divider(
                                 height: 5,
                                 thickness: 2,
                               ),
@@ -264,7 +340,7 @@ class _MainPageState extends State<MainPage> {
                           );
                         },
                       )
-                    : Center(
+                    : const Center(
                         child: Text('No posts found'),
                       ),
           ),
@@ -284,7 +360,7 @@ class _MainPageState extends State<MainPage> {
                   _loadPosts();
                 }
               },
-              child: Icon(Icons.add),
+              child: const Icon(Icons.add),
             )
           : null,
     );

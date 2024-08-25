@@ -4,9 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'database_helper.dart';
 import 'widgets/sidebar.dart';
 import 'post_detail_page.dart';
-import 'create_post_page.dart';
 
 class ManagePostPage extends StatefulWidget {
+  const ManagePostPage({Key? key}) : super(key: key);
+
   @override
   _ManagePostPageState createState() => _ManagePostPageState();
 }
@@ -75,18 +76,18 @@ class _ManagePostPageState extends State<ManagePostPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Filter Posts'),
+          title: const Text('Filter Posts'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text('Area:'),
                 ),
                 DropdownButtonFormField<String>(
                   value: _selectedArea.isNotEmpty ? _selectedArea : null,
-                  hint: Text('Select Area'),
+                  hint: const Text('Select Area'),
                   items: [
                     'Any',
                     'Johor',
@@ -115,16 +116,16 @@ class _ManagePostPageState extends State<ManagePostPage> {
                     });
                   },
                 ),
-                SizedBox(height: 16.0),
-                Align(
+                const SizedBox(height: 16.0),
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text('Minimum Salary:'),
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 TextField(
                   controller: _minSalaryController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Min Salary',
                     border: OutlineInputBorder(),
                   ),
@@ -143,7 +144,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
                 Navigator.of(context).pop();
                 _filterPosts(_searchController.text);
               },
-              child: Text('Apply'),
+              child: const Text('Apply'),
             ),
             TextButton(
               onPressed: () {
@@ -155,7 +156,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
                 });
                 _filterPosts(_searchController.text);
               },
-              child: Text('Reset'),
+              child: const Text('Reset'),
             ),
           ],
         );
@@ -181,13 +182,13 @@ class _ManagePostPageState extends State<ManagePostPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Posts'),
+        title: const Text('Manage Posts'),
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
                 Expanded(
@@ -195,7 +196,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Search posts...',
-                      prefixIcon: Icon(Icons.search),
+                      prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -203,9 +204,9 @@ class _ManagePostPageState extends State<ManagePostPage> {
                     onChanged: _filterPosts,
                   ),
                 ),
-                SizedBox(width: 8.0),
+                const SizedBox(width: 8.0),
                 IconButton(
-                  icon: Icon(Icons.filter_list, size: 30),
+                  icon: const Icon(Icons.filter_list, size: 30),
                   onPressed: _showFilterDialog,
                 ),
               ],
@@ -213,7 +214,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
           ),
           Expanded(
             child: _isLoading
-                ? Center(
+                ? const Center(
                     child: CircularProgressIndicator(),
                   )
                 : _filteredPosts.isNotEmpty
@@ -221,7 +222,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
                         itemCount: _filteredPosts.length,
                         itemBuilder: (context, index) {
                           final post = _filteredPosts[index];
-                          final imagePath = post['imageName'];
+                          final imagePath = post['imageName']?? 'lib/image/no_Image.jpg';
                           final file = File(imagePath);
                           return Column(
                             children: [
@@ -248,7 +249,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
                                     Text(post['area']),
                                   ],
                                 ),
-                                trailing: Row(
+                                trailing: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(Icons.arrow_right, size: 30),
@@ -258,7 +259,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
                                   _navigateToPostDetail(post);
                                 },
                               ),
-                              Divider(
+                              const Divider(
                                 height: 5,
                                 thickness: 2,
                               ),
@@ -266,7 +267,7 @@ class _ManagePostPageState extends State<ManagePostPage> {
                           );
                         },
                       )
-                    : Center(
+                    : const Center(
                         child: Text('No posts found'),
                       ),
           ),

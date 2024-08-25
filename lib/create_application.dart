@@ -9,7 +9,7 @@ import 'database_helper.dart';
 class CreateApplicationPage extends StatefulWidget {
   final int postId;
 
-  CreateApplicationPage({required this.postId});
+  const CreateApplicationPage({Key? key, required this.postId}) : super(key: key);
 
   @override
   _CreateApplicationPageState createState() => _CreateApplicationPageState();
@@ -56,14 +56,14 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final path = '${directory.path}/resumes/';
-      final uniqueName = Uuid().v4();
+      final uniqueName = const Uuid().v4();
       final file = File('$path${uniqueName}_${resume.path.split('/').last}');
       await file.create(recursive: true);
       await file.writeAsBytes(await resume.readAsBytes());
       return file.path;
     } catch (e) {
       print('Error saving resume: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -71,19 +71,19 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Apply for Job'),
+        title: const Text('Apply for Job'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              Text('Name', style: TextStyle(fontSize: 16.0)),
-              SizedBox(height: 8.0),
+              const Text('Name', style: TextStyle(fontSize: 16.0)),
+              const SizedBox(height: 8.0),
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(border: OutlineInputBorder()),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your name';
@@ -91,12 +91,12 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
-              Text('Contact Number', style: TextStyle(fontSize: 16.0)),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 16.0),
+              const Text('Contact Number', style: TextStyle(fontSize: 16.0)),
+              const SizedBox(height: 8.0),
               TextFormField(
                 controller: _contactNoController,
-                decoration: InputDecoration(border: OutlineInputBorder()),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your contact number';
@@ -104,12 +104,12 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
-              Text('Email', style: TextStyle(fontSize: 16.0)),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 16.0),
+              const Text('Email', style: TextStyle(fontSize: 16.0)),
+              const SizedBox(height: 8.0),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(border: OutlineInputBorder()),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -117,31 +117,31 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
-              Text('Resume', style: TextStyle(fontSize: 16.0)),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 16.0),
+              const Text('Resume', style: TextStyle(fontSize: 16.0)),
+              const SizedBox(height: 8.0),
               Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _pickResume,
-                      child: Text('Upload Resume'),
+                      child: const Text('Upload Resume'),
                     ),
                   ),
-                  SizedBox(width: 16.0),
+                  const SizedBox(width: 16.0),
                   if (_resume != null)
                     Text(
-                      '${_resume!.path.split('/').last}',
-                      style: TextStyle(fontSize: 16.0),
+                      _resume!.path.split('/').last,
+                      style: const TextStyle(fontSize: 16.0),
                     ),
                 ],
               ),
-              SizedBox(height: 16.0),
-              Text('Description', style: TextStyle(fontSize: 16.0)),
-              SizedBox(height: 8.0),
+              const SizedBox(height: 16.0),
+              const Text('Description', style: TextStyle(fontSize: 16.0)),
+              const SizedBox(height: 8.0),
               TextFormField(
                 controller: _descriptionController,
-                decoration: InputDecoration(border: OutlineInputBorder()),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
                 maxLines: 4,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -150,7 +150,7 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
@@ -179,13 +179,13 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
                     await _databaseHelper.insertApplicant(application);
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Application submitted successfully!')),
+                      const SnackBar(content: Text('Application submitted successfully!')),
                     );
 
                     Navigator.pop(context);
                   }
                 },
-                child: Text('Submit Application'),
+                child: const Text('Submit Application'),
               ),
             ],
           ),

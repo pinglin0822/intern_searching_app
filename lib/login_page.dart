@@ -5,6 +5,8 @@ import 'main_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -36,17 +38,17 @@ class _LoginPageState extends State<LoginPage> {
 
         // Successfully logged in
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login successful!')),
+          const SnackBar(content: Text('Login successful!')),
           
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MainPage()),  // Navigate to MainPage
+          MaterialPageRoute(builder: (context) => const MainPage()),  // Navigate to MainPage
         );
       } else {
         // Failed to log in
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid username or password')),
+          const SnackBar(content: Text('Invalid username or password')),
         );
       }
     }
@@ -55,16 +57,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: const Text('Login')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: Column(
             children: <Widget>[
               TextFormField(
                 controller: _usernameController,
-                decoration: InputDecoration(labelText: 'Username'),
+                decoration: const InputDecoration(labelText: 'Username'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your username';
@@ -74,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -83,19 +85,19 @@ class _LoginPageState extends State<LoginPage> {
                   return null;
                 },
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () => _login(context),
-                child: Text('Login'),
+                child: const Text('Login'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => SignupPage()),
+                    MaterialPageRoute(builder: (context) => const SignupPage()),
                   );
                 },
-                child: Text('Don\'t have an account? Sign up'),
+                child: const Text('Don\'t have an account? Sign up'),
               ),
             ],
           ),

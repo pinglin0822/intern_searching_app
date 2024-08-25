@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:open_file/open_file.dart';
 import 'database_helper.dart';
@@ -8,7 +7,7 @@ import 'database_helper.dart';
 class ViewApplicantPage extends StatefulWidget {
   final Map<String, dynamic> post;
 
-  ViewApplicantPage({required this.post});
+  const ViewApplicantPage({Key? key, required this.post}) : super(key: key);
 
   @override
   _ViewApplicantPageState createState() => _ViewApplicantPageState();
@@ -52,12 +51,12 @@ class _ViewApplicantPageState extends State<ViewApplicantPage> {
         final result = await OpenFile.open(newPath);
         if (result.type != ResultType.done) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to open the file')),
+            const SnackBar(content: Text('Failed to open the file')),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not find download directory')),
+          const SnackBar(content: Text('Could not find download directory')),
         );
       }
     } catch (e) {
@@ -73,52 +72,52 @@ class _ViewApplicantPageState extends State<ViewApplicantPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Applicants List'),
+        title: const Text('Applicants List'),
         backgroundColor: Colors.blueAccent,
       ),
       body: _applicants.isEmpty
-          ? Center(child: Text('No applicants found', style: TextStyle(fontSize: 18, color: Colors.grey)))
+          ? const Center(child: Text('No applicants found', style: TextStyle(fontSize: 18, color: Colors.grey)))
           : ListView.builder(
-              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
               itemCount: _applicants.length,
               itemBuilder: (context, index) {
                 final applicant = _applicants[index];
 
                 return Card(
                   elevation: 5,
-                  margin: EdgeInsets.only(bottom: 10),
+                  margin: const EdgeInsets.only(bottom: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           applicant['name'],
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                         ),
-                        SizedBox(height: 8),
-                        Text('Email: ${applicant['email']}', style: TextStyle(fontSize: 16, color: Colors.black54)),
-                        Text('Contact No: ${applicant['contactNo']}', style: TextStyle(fontSize: 16, color: Colors.black54)),
-                        SizedBox(height: 12),
-                        Text('Description:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
-                        SizedBox(height: 4),
-                        Text(applicant['description'] ?? 'No description provided', style: TextStyle(fontSize: 16, color: Colors.black54)),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 8),
+                        Text('Email: ${applicant['email']}', style: const TextStyle(fontSize: 16, color: Colors.black54)),
+                        Text('Contact No: ${applicant['contactNo']}', style: const TextStyle(fontSize: 16, color: Colors.black54)),
+                        const SizedBox(height: 12),
+                        const Text('Description:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87)),
+                        const SizedBox(height: 4),
+                        Text(applicant['description'] ?? 'No description provided', style: const TextStyle(fontSize: 16, color: Colors.black54)),
+                        const SizedBox(height: 15),
                         ElevatedButton(
                           onPressed: () {
                             _downloadResume(applicant['resume']);
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.blueAccent,
-                            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                            backgroundColor: Colors.blueAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text('Download Resume', style: TextStyle(fontSize: 16)),
+                          child: const Text('Download Resume', style: TextStyle(fontSize: 16)),
                         ),
                       ],
                     ),
