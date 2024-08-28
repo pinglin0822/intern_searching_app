@@ -30,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (result.isNotEmpty) {
-
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setInt('userId', result[0]['id']);
         await prefs.setString('username', result[0]['username']);
@@ -39,11 +38,11 @@ class _LoginPageState extends State<LoginPage> {
         // Successfully logged in
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
-          
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainPage()),  // Navigate to MainPage
+          MaterialPageRoute(
+              builder: (context) => const MainPage()), // Navigate to MainPage
         );
       } else {
         // Failed to log in
@@ -64,6 +63,18 @@ class _LoginPageState extends State<LoginPage> {
           key: _formKey,
           child: Column(
             children: <Widget>[
+              Image.asset(
+                'lib/image/myIntern.png',
+                fit: BoxFit.cover,
+              ),
+              const SizedBox(height: 20.0), // Add some space between the image and text
+            const Text(
+              'Welcome to MyIntern!',
+              style: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(labelText: 'Username'),
