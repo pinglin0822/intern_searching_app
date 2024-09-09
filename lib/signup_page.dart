@@ -53,7 +53,13 @@ class _SignupPageState extends State<SignupPage> {
             children: <Widget>[
               TextFormField(
                 controller: _usernameController,
-                decoration: const InputDecoration(labelText: 'Username'),
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  prefixIcon: const Icon(Icons.person),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your username';
@@ -61,9 +67,16 @@ class _SignupPageState extends State<SignupPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10.0),
               TextFormField(
                 controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  prefixIcon: const Icon(Icons.lock),
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -72,9 +85,16 @@ class _SignupPageState extends State<SignupPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 10.0),
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  prefixIcon: const Icon(Icons.email),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your email';
@@ -83,6 +103,14 @@ class _SignupPageState extends State<SignupPage> {
                 },
               ),
               const SizedBox(height: 20.0),
+              const Text(
+                'Select Account Type:',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5.0),
               Row(
                 children: [
                   Expanded(
@@ -97,6 +125,7 @@ class _SignupPageState extends State<SignupPage> {
                           });
                         },
                       ),
+                      contentPadding: EdgeInsets.zero, // Reduce padding
                     ),
                   ),
                   Expanded(
@@ -111,6 +140,7 @@ class _SignupPageState extends State<SignupPage> {
                           });
                         },
                       ),
+                      contentPadding: EdgeInsets.zero, // Reduce padding
                     ),
                   ),
                 ],

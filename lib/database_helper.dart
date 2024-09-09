@@ -25,15 +25,15 @@ class DatabaseHelper {
   }
 
   Future _onCreate(Database db, int version) async {
-    await db.execute(
-      "CREATE TABLE users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, email TEXT, userType TEXT)",
-    );
-    await db.execute(
-      "CREATE TABLE posts(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, imageName TEXT, userId INTEGER, companyName TEXT, lowestSalary REAL, highestSalary REAL, description TEXT, area TEXT, longitude REAL, latitude REAL, status TEXT, registration_no TEXT, FOREIGN KEY (userId) REFERENCES users (id))",
-    );
-    await db.execute(
-      "CREATE TABLE applicants(id INTEGER PRIMARY KEY AUTOINCREMENT, postId INTEGER, userId INTEGER, name TEXT, resume TEXT, contactNo TEXT, email TEXT, description TEXT, FOREIGN KEY (postId) REFERENCES posts (id), FOREIGN KEY (userId) REFERENCES users (id))",
-    );
+      await db.execute(
+        "CREATE TABLE users(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, email TEXT, userType TEXT)",
+      );
+      await db.execute(
+        "CREATE TABLE posts(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, imageName TEXT, userId INTEGER, companyName TEXT, lowestSalary REAL, highestSalary REAL, description TEXT, area TEXT, longitude REAL, latitude REAL, status TEXT, registration_no TEXT, FOREIGN KEY (userId) REFERENCES users (id))",
+      );
+      await db.execute(
+        "CREATE TABLE applicants(id INTEGER PRIMARY KEY AUTOINCREMENT, postId INTEGER, userId INTEGER, name TEXT, resume TEXT, contactNo TEXT, email TEXT, description TEXT, FOREIGN KEY (postId) REFERENCES posts (id), FOREIGN KEY (userId) REFERENCES users (id))",
+      );
 
     await db.insert(
       'users',

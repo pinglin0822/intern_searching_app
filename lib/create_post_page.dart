@@ -24,19 +24,34 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _companyNameController = TextEditingController();
   final TextEditingController _lowestSalaryController = TextEditingController();
-  final TextEditingController _highestSalaryController = TextEditingController();
+  final TextEditingController _highestSalaryController =
+      TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _longitudeController = TextEditingController();
   final TextEditingController _latitudeController = TextEditingController();
-  final TextEditingController _registrationNoController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController(); // New controller for the address
+  final TextEditingController _registrationNoController =
+      TextEditingController();
+  final TextEditingController _addressController =
+      TextEditingController(); // New controller for the address
 
   String? _selectedArea;
   XFile? _image;
 
   final List<String> _areas = [
-    'Johor', 'Kedah', 'Kelantan', 'Kuala Lumpur', 'Melaka', 'Negeri Sembilan',
-    'Pahang', 'Perak', 'Perlis', 'Penang', 'Sabah', 'Sarawak', 'Selangor', 'Terengganu',
+    'Johor',
+    'Kedah',
+    'Kelantan',
+    'Kuala Lumpur',
+    'Melaka',
+    'Negeri Sembilan',
+    'Pahang',
+    'Perak',
+    'Perlis',
+    'Penang',
+    'Sabah',
+    'Sarawak',
+    'Selangor',
+    'Terengganu',
   ];
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
@@ -56,7 +71,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image = pickedImage;
     });
@@ -74,17 +90,20 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   Future<void> _getCoordinatesFromAddress() async {
     try {
-      List<Location> locations = await locationFromAddress(_addressController.text);
+      List<Location> locations =
+          await locationFromAddress(_addressController.text);
       if (locations.isNotEmpty) {
         setState(() {
           _latitudeController.text = locations[0].latitude.toString();
           _longitudeController.text = locations[0].longitude.toString();
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No coordinates found for this address')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('No coordinates found for this address')));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error finding address')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Error finding address')));
     }
   }
 
@@ -99,17 +118,17 @@ class _CreatePostPageState extends State<CreatePostPage> {
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
-            child: 
+              child: Column(
+            children: [
               Column(
-                children: [
-                  Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Job Title', style: TextStyle(fontSize: 16.0)),
                   const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _titleController,
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a job title';
@@ -127,7 +146,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _companyNameController,
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a company name';
@@ -141,11 +161,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Registration Number', style: TextStyle(fontSize: 16.0)),
+                  const Text('Registration Number',
+                      style: TextStyle(fontSize: 16.0)),
                   const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _registrationNoController,
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a registration number';
@@ -197,7 +219,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   const SizedBox(height: 8.0),
                   DropdownButtonFormField<String>(
                     value: _selectedArea,
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
                     items: _areas.map((String area) {
                       return DropdownMenuItem<String>(
                         value: area,
@@ -269,11 +292,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Job Description', style: TextStyle(fontSize: 16.0)),
+                  const Text('Job Description',
+                      style: TextStyle(fontSize: 16.0)),
                   const SizedBox(height: 8.0),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: const InputDecoration(border: OutlineInputBorder()),
+                    decoration:
+                        const InputDecoration(border: OutlineInputBorder()),
                     maxLines: 4,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -291,33 +316,33 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   const Text('Address', style: TextStyle(fontSize: 16.0)),
                   const SizedBox(height: 8.0),
                   GooglePlacesAutoCompleteTextFormField(
-                textEditingController: _addressController,
-                googleAPIKey: "AIzaSyBUjSAHP6GNjLJCYQe02yCu5wbZiNLznA4",
-                decoration: const InputDecoration(
-                  hintText: 'Enter your address',
-                  labelText: 'Address',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter some text';
-                  }
-                  return null;
-                },
-                // proxyURL: _yourProxyURL,
-                maxLines: 1,
-                overlayContainer: (child) => Material(
-                  elevation: 1.0,
-                  //color: Colors.green,
-                  borderRadius: BorderRadius.circular(12),
-                  child: child,
-                ),
-                getPlaceDetailWithLatLng: (prediction) {
-                  print('placeDetails${prediction.lng}');
-                },
-                itmClick: (Prediction prediction) =>
-                    _addressController.text = prediction.description!,
-              ),
+                    textEditingController: _addressController,
+                    googleAPIKey: "AIzaSyBUjSAHP6GNjLJCYQe02yCu5wbZiNLznA4",
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your address',
+                      labelText: 'Address',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter some text';
+                      }
+                      return null;
+                    },
+                    // proxyURL: _yourProxyURL,
+                    maxLines: 1,
+                    overlayContainer: (child) => Material(
+                      elevation: 1.0,
+                      //color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                      child: child,
+                    ),
+                    getPlaceDetailWithLatLng: (prediction) {
+                      print('placeDetails${prediction.lng}');
+                    },
+                    itmClick: (Prediction prediction) =>
+                        _addressController.text = prediction.description!,
+                  ),
                   const SizedBox(height: 8.0),
                   ElevatedButton(
                     onPressed: _getCoordinatesFromAddress,
@@ -381,12 +406,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       'userId': _userId,
                       'title': _titleController.text ?? "error",
                       'companyName': _companyNameController.text ?? 'error',
-                      'lowestSalary': int.parse(_lowestSalaryController.text) ?? 0,
-                      'highestSalary': int.parse(_highestSalaryController.text) ?? 0,
+                      'lowestSalary':
+                          int.parse(_lowestSalaryController.text) ?? 0,
+                      'highestSalary':
+                          int.parse(_highestSalaryController.text) ?? 0,
                       'description': _descriptionController.text ?? 'error',
                       'longitude': double.parse(_longitudeController.text) ?? 0,
                       'latitude': double.parse(_latitudeController.text) ?? 0,
-                      'registration_no': _registrationNoController.text ?? 'error',
+                      'registration_no':
+                          _registrationNoController.text ?? 'error',
                       'status': 'pending',
                       'area': _selectedArea ?? 'error',
                       'imageName': imagePath,
@@ -395,16 +423,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     await _databaseHelper.insertPost(post);
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const MyPostPage()),
+                      MaterialPageRoute(
+                          builder: (context) => const MyPostPage()),
                     );
                   }
                 },
                 child: const Text('Create Post'),
               ),
             ],
-              )
-              
-          ),
+          )),
         ),
       ),
     );

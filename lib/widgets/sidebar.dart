@@ -4,7 +4,7 @@ import '../main_page.dart';
 import '../login_page.dart';
 import '../manage_post.dart'; // Import the manage_post.dart file
 import '../my_post.dart'; // Import the my_post.dart file
-import '../question_page.dart';
+import '../data_analyst.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({Key? key}) : super(key: key);
@@ -77,16 +77,6 @@ class _AppDrawerState extends State<AppDrawer> {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('question'),
-            onTap: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => QuestionPage()),
-              );
-            },
-          ),
           // Conditionally show "Manage Post" button for admins
           if (_userType == 'admin') ...[
             ListTile(
@@ -96,6 +86,16 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const ManagePostPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart),
+              title: const Text('Data Analysis'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DataAnalystPage()),
                 );
               },
             ),

@@ -27,7 +27,7 @@ class _MainPageState extends State<MainPage> {
   double _minSalary = 0;
   final TextEditingController _minSalaryController =
       TextEditingController(text: '0');
-  String _statusText = 'Search for posts by title, company, or area';
+  String _statusText = '';
   List<String> _suggestions = [];
   final String _apiKey = 'sk-X6pD1ld26wH7OgVfLldYTySnjeNb2Wj8EnPJKAO1d2KdSpZO';
 
@@ -61,9 +61,6 @@ class _MainPageState extends State<MainPage> {
 
   void _filterPosts() async {
     final query = _searchController.text;
-    if (query.isNotEmpty) {
-      await _generateKeywords(query);
-    }
     setState(() {
       _filteredPosts = _posts.where((post) {
         final titleLower = post['title'].toLowerCase();
@@ -82,12 +79,10 @@ class _MainPageState extends State<MainPage> {
             isInSalaryRange &&
             isInAreaFilter;
       }).toList();
-      _statusText =
-          "Keywords that you may also interested: ${_suggestions.join(', ')}";
-      if (query.isEmpty) {
-        _statusText = '';
-      }
     });
+    if (query.isNotEmpty) {
+      await _generateKeywords(query);
+    }
   }
 
   Future<void> _generateKeywords(String query) async {
@@ -108,7 +103,7 @@ class _MainPageState extends State<MainPage> {
             },
             {
               'role': 'user',
-              'content': 'Generate 5 similar job title keywords for: $query',
+              'content': 'Generate 5 similar job title keywords for: $query,just give me the list',
             },
           ],
           'max_tokens': 50,
@@ -123,6 +118,11 @@ class _MainPageState extends State<MainPage> {
         final List<String> keywords = text.split('\n');
         setState(() {
           _suggestions = keywords.map((keyword) => keyword.trim()).toList();
+          _statusText =
+          "Keywords that you may also interested: ${_suggestions.join(', ')}";
+      if (query.isEmpty) {
+        _statusText = '';
+      }
         });
       } else {
         print(
