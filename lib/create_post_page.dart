@@ -10,6 +10,7 @@ import 'my_post.dart';
 import 'package:geocoding/geocoding.dart'; // Import for geocoding (converting address to coordinates)
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:google_places_autocomplete_text_field/model/prediction.dart';
+import 'apikeys.dart';
 
 class CreatePostPage extends StatefulWidget {
   const CreatePostPage({Key? key}) : super(key: key);
@@ -317,7 +318,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   const SizedBox(height: 8.0),
                   GooglePlacesAutoCompleteTextFormField(
                     textEditingController: _addressController,
-                    googleAPIKey: "AIzaSyBUjSAHP6GNjLJCYQe02yCu5wbZiNLznA4",
+                    googleAPIKey: ApiKeys.googleApiKey,
                     decoration: const InputDecoration(
                       hintText: 'Enter your address',
                       labelText: 'Address',

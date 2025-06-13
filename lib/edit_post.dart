@@ -8,6 +8,7 @@ import 'database_helper.dart';
 import 'package:google_places_autocomplete_text_field/google_places_autocomplete_text_field.dart';
 import 'package:google_places_autocomplete_text_field/model/prediction.dart';
 import 'package:geocoding/geocoding.dart';
+import 'apikeys.dart';
 
 class EditPostPage extends StatefulWidget {
   final Map<String, dynamic> post;
@@ -332,18 +333,12 @@ class _EditPostPageState extends State<EditPostPage> {
                   const SizedBox(height: 8.0),
                   GooglePlacesAutoCompleteTextFormField(
                 textEditingController: _addressController,
-                googleAPIKey: "AIzaSyBUjSAHP6GNjLJCYQe02yCu5wbZiNLznA4",
+                googleAPIKey: ApiKeys.googleApiKey,
                 decoration: const InputDecoration(
                   hintText: 'Enter your address',
                   labelText: 'Address',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter some text';
-                  }
-                  return null;
-                },
                 // proxyURL: _yourProxyURL,
                 maxLines: 1,
                 overlayContainer: (child) => Material(

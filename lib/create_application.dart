@@ -130,10 +130,13 @@ class _CreateApplicationPageState extends State<CreateApplicationPage> {
                   ),
                   const SizedBox(width: 16.0),
                   if (_resume != null)
-                    Text(
+                                          Flexible(
+                          child: Text(
                       _resume!.path.split('/').last,
-                      style: const TextStyle(fontSize: 16.0),
-                    ),
+                            style: const TextStyle(fontSize: 16.0),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                 ],
               ),
               const SizedBox(height: 16.0),
